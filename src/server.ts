@@ -1,22 +1,20 @@
+import pino from 'pino';
 import app from './app.js';
 import { env } from './config/env.js';
-import pino from 'pino';
 
 const logger = pino({ name: 'rove-hire-server' });
 
 const server = app.listen(env.PORT, () => {
-  logger.info(`🚀 Rove Hire backend running on port ${env.PORT} [${env.NODE_ENV}]`);
+  logger.info(`Rove Hire backend running on port ${env.PORT} [${env.NODE_ENV}]`);
 });
 
-// Graceful shutdown
-const gracefulShutdown = (signal: string) => {
+const gracefulShutdown = (signal: string): void => {
   logger.info(`${signal} received — shutting down gracefully`);
   server.close(() => {
     logger.info('HTTP server closed');
     process.exit(0);
   });
 
-  // Force shutdown after 10 seconds
   setTimeout(() => {
     logger.error('Forced shutdown after timeout');
     process.exit(1);

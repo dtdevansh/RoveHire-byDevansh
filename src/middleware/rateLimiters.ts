@@ -1,11 +1,8 @@
 import rateLimit from 'express-rate-limit';
-import { fail } from '../lib/response.js';
 import type { Request, Response } from 'express';
+import { fail } from '../lib/response.js';
 
-/**
- * Global rate limiter for all routes (OWASP API4).
- * 100 requests per 15 minutes per IP.
- */
+// API4: global limiter caps request volume across every route.
 export const globalLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 100,
@@ -16,10 +13,7 @@ export const globalLimiter = rateLimit({
   },
 });
 
-/**
- * Stricter rate limiter for the unauthenticated /apply surface (API4/API6).
- * 10 requests per 15 minutes per IP.
- */
+// API6: the unauthenticated /apply business flow gets a stricter, isolated limiter.
 export const publicLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 10,

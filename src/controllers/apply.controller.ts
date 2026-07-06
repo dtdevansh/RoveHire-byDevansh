@@ -2,10 +2,6 @@ import type { Request, Response, NextFunction } from 'express';
 import { ok } from '../lib/response.js';
 import * as applyService from '../services/apply.service.js';
 
-/**
- * GET /api/v1/apply/:token
- * Public — no requireAuth. Returns minimal context for the apply page.
- */
 export async function getApplyContext(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
     const context = await applyService.getApplyContext(req.params['token'] as string);
@@ -15,10 +11,6 @@ export async function getApplyContext(req: Request, res: Response, next: NextFun
   }
 }
 
-/**
- * POST /api/v1/apply/:token
- * Public — no requireAuth. Submits the application form.
- */
 export async function submitApplication(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
     await applyService.submitApplication(req.params['token'] as string, req.body);

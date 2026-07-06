@@ -16,28 +16,17 @@ import offersRoutes from './offers.routes.js';
 
 const router = Router();
 
-// ─────────────────────────────────────────────────────────────
-// Health check (used by Docker HEALTHCHECK)
-// ─────────────────────────────────────────────────────────────
 router.get('/health', (_req: Request, res: Response) => {
   res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
-// ─────────────────────────────────────────────────────────────
-// Mount route groups
-// ─────────────────────────────────────────────────────────────
-router.use('/', authRoutes);                    // /api/v1/me
-router.use('/jobs', jobsRoutes);                // /api/v1/jobs
-router.use('/candidates', candidatesRoutes);    // /api/v1/candidates
-router.use('/apply', applyRoutes);              // /api/v1/apply (PUBLIC)
-router.use('/interviews', interviewsRoutes);    // /api/v1/interviews
-router.use('/offers', offersRoutes);            // /api/v1/offers
+router.use('/', authRoutes);
+router.use('/jobs', jobsRoutes);
+router.use('/candidates', candidatesRoutes);
+router.use('/apply', applyRoutes);
+router.use('/interviews', interviewsRoutes);
+router.use('/offers', offersRoutes);
 
-// ─────────────────────────────────────────────────────────────
-// Nested routes (actions on candidates)
-// ─────────────────────────────────────────────────────────────
-
-// POST /api/v1/candidates/:id/interviews — schedule interview
 router.post(
   '/candidates/:id/interviews',
   requireAuth,
@@ -45,7 +34,6 @@ router.post(
   interviewsController.scheduleInterview,
 );
 
-// POST /api/v1/candidates/:id/offers — generate offer
 router.post(
   '/candidates/:id/offers',
   requireAuth,

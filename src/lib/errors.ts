@@ -1,9 +1,3 @@
-// ─────────────────────────────────────────────────────────────
-// Typed application errors.
-// The centralized error handler maps these to HTTP status codes
-// and the standard { data, error } envelope.
-// ─────────────────────────────────────────────────────────────
-
 export class AppError extends Error {
   public readonly statusCode: number;
   public readonly code: string;

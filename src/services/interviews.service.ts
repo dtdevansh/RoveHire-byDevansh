@@ -5,10 +5,6 @@ import { appendEvent } from './timeline.service.js';
 import { touchActivity } from './candidates.service.js';
 import type { Interview, CandidateStatus } from '../types/models.js';
 
-/**
- * Schedule an interview for a candidate.
- * Transitions candidate status to 'Interview Scheduled'.
- */
 export async function scheduleInterview(
   candidateId: string,
   data: {
@@ -18,7 +14,6 @@ export async function scheduleInterview(
     notes?: string | null;
   },
 ): Promise<Interview> {
-  // Fetch candidate to check status
   const { data: candidate, error: fetchError } = await db
     .from('candidates')
     .select('status')
@@ -29,7 +24,6 @@ export async function scheduleInterview(
 
   const currentStatus = candidate.status as CandidateStatus;
 
-  // Only transition if not already in Interview Scheduled or later
   if (currentStatus === 'Form Submitted') {
     const result = canTransition(currentStatus, 'Interview Scheduled', {
       hasCompletedInterview: false,
@@ -46,13 +40,13 @@ export async function scheduleInterview(
       })
       .eq('id', candidateId);
   } else if (currentStatus === 'Interview Scheduled') {
-    // Additional interviews — just touch activity
     await touchActivity(candidateId);
   } else {
-    throw new ConflictError(`Cannot schedule interview when candidate is in "${currentStatus}" status`);
+    throw new ConflictError(
+      `Cannot schedule interview when candidate is in "${currentStatus}" status`,
+    );
   }
 
-  // Create interview record
   const { data: interview, error: insertError } = await db
     .from('interviews')
     .insert({
@@ -69,7 +63,6 @@ export async function scheduleInterview(
     throw new Error(`Failed to create interview: ${insertError?.message}`);
   }
 
-  // Timeline event
   await appendEvent(
     candidateId,
     'interview_scheduled',
@@ -80,10 +73,9 @@ export async function scheduleInterview(
   return interview as unknown as Interview;
 }
 
-/**
- * List all interviews with candidate info, sorted by scheduled_at.
- */
-export async function listInterviews(): Promise<Array<Interview & { candidate_name: string; candidate_role: string }>> {
+export async function listInterviews(): Promise<
+  Array<Interview & { candidate_name: string; candidate_role: string }>
+> {
   const { data: interviews, error } = await db
     .from('interviews')
     .select('*, candidates(name, current_role)')
@@ -101,10 +93,6 @@ export async function listInterviews(): Promise<Array<Interview & { candidate_na
   });
 }
 
-/**
- * Complete an interview with feedback.
- * Does NOT change candidate status — only unlocks generate_offer via allowed_actions.
- */
 export async function completeInterview(
   interviewId: string,
   data: {
@@ -113,7 +101,6 @@ export async function completeInterview(
     feedback_note?: string | null;
   },
 ): Promise<Interview> {
-  // Fetch interview
   const { data: interview, error: fetchError } = await db
     .from('interviews')
     .select()
@@ -126,7 +113,6 @@ export async function completeInterview(
     throw new ConflictError('Interview has already been completed');
   }
 
-  // Update interview
   const { data: updated, error: updateError } = await db
     .from('interviews')
     .update({
@@ -142,10 +128,8 @@ export async function completeInterview(
     throw new Error(`Failed to complete interview: ${updateError?.message}`);
   }
 
-  // Touch candidate activity
   await touchActivity(interview.candidate_id as string);
 
-  // Timeline event
   await appendEvent(
     interview.candidate_id as string,
     'feedback_recorded',

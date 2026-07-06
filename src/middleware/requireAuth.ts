@@ -9,13 +9,7 @@ interface JwtPayload {
   [key: string]: unknown;
 }
 
-/**
- * Verify Supabase-issued JWT from the Authorization header.
- * Attaches { id, email } to req.user on success.
- *
- * No round-trip to Supabase per request — verification is done locally
- * using the JWT secret.
- */
+// API2/API5: gates every non-public router by verifying the Supabase JWT signature locally with SUPABASE_JWT_SECRET.
 export function requireAuth(req: Request, res: Response, next: NextFunction): void {
   const authHeader = req.headers.authorization;
 

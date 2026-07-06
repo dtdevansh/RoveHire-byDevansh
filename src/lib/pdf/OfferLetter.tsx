@@ -1,9 +1,5 @@
 import { Document, Page, Text, View, StyleSheet } from '@react-pdf/renderer';
 
-// ─────────────────────────────────────────────────────────────
-// Offer Letter PDF Template
-// ─────────────────────────────────────────────────────────────
-
 const styles = StyleSheet.create({
   page: {
     padding: 60,

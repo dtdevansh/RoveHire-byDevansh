@@ -1,9 +1,6 @@
 import { S3Client } from '@aws-sdk/client-s3';
 import { env } from './env.js';
 
-/**
- * S3-compatible client pointed at Cloudflare R2.
- */
 export const r2Client = new S3Client({
   region: 'auto',
   endpoint: env.R2_ENDPOINT,

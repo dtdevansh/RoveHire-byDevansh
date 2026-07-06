@@ -6,13 +6,10 @@ import * as applyController from '../controllers/apply.controller.js';
 
 const router = Router();
 
-// PUBLIC — no requireAuth, stricter rate limit
+// API6: public application surface — no requireAuth, guarded by the stricter publicLimiter.
 router.use(publicLimiter);
 
-// GET    /api/v1/apply/:token   — Validate token + get context
 router.get('/:token', validate(getApplyContextSchema), applyController.getApplyContext);
-
-// POST   /api/v1/apply/:token   — Submit the application form
 router.post('/:token', validate(submitApplicationSchema), applyController.submitApplication);
 
 export default router;

@@ -1,8 +1,5 @@
 import { z } from 'zod';
 
-/**
- * POST /api/v1/candidates/:id/interviews — Schedule an interview.
- */
 export const createInterviewSchema = z.object({
   params: z.object({
     id: z.string().uuid(),
@@ -15,9 +12,6 @@ export const createInterviewSchema = z.object({
   }),
 });
 
-/**
- * PATCH /api/v1/interviews/:id — Complete an interview with feedback.
- */
 export const updateInterviewSchema = z.object({
   params: z.object({
     id: z.string().uuid(),

@@ -1,10 +1,6 @@
 import { db } from '../db/client.js';
 import type { TimelineEventType } from '../types/models.js';
 
-/**
- * Append a timeline event for a candidate.
- * Timeline is append-only — events are never updated or deleted.
- */
 export async function appendEvent(
   candidateId: string,
   type: TimelineEventType,

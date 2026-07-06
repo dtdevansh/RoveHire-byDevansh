@@ -3,9 +3,6 @@ import { NotFoundError } from '../lib/errors.js';
 import type { JobOpening } from '../types/models.js';
 import type { JobListItemDTO } from '../types/dto.js';
 
-/**
- * List all jobs with candidate counts.
- */
 export async function listJobs(): Promise<JobListItemDTO[]> {
   const { data: jobs, error } = await db
     .from('job_openings')
@@ -14,7 +11,6 @@ export async function listJobs(): Promise<JobListItemDTO[]> {
 
   if (error) throw new Error(`Failed to list jobs: ${error.message}`);
 
-  // Get candidate counts per job
   const { data: counts, error: countError } = await db
     .from('candidates')
     .select('job_opening_id');
@@ -37,9 +33,6 @@ export async function listJobs(): Promise<JobListItemDTO[]> {
   }));
 }
 
-/**
- * Create a new job opening.
- */
 export async function createJob(data: {
   title: string;
   description?: string | null;
@@ -61,9 +54,6 @@ export async function createJob(data: {
   return job as unknown as JobOpening;
 }
 
-/**
- * Get a single job by ID.
- */
 export async function getJob(id: string): Promise<JobOpening> {
   const { data: job, error } = await db
     .from('job_openings')
@@ -75,9 +65,6 @@ export async function getJob(id: string): Promise<JobOpening> {
   return job as unknown as JobOpening;
 }
 
-/**
- * Update a job opening.
- */
 export async function updateJob(
   id: string,
   data: {

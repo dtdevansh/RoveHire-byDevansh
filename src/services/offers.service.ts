@@ -7,16 +7,6 @@ import { canTransition } from './stateMachine.js';
 import { appendEvent } from './timeline.service.js';
 import type { OfferDocument, CandidateStatus } from '../types/models.js';
 
-/**
- * Generate offer letter + NDA for a candidate.
- *
- * Flow: render PDFs → upload to R2 → insert offer_documents → first offer
- * transitions candidate to 'Offer Sent' (subsequent ones append, status stays)
- * → write 'offer_generated' timeline event.
- *
- * Guards: candidate must be 'Interview Scheduled'+ AND have ≥1 Completed interview.
- * Blocked once 'Hired' (terminal).
- */
 export async function generateOffer(
   candidateId: string,
   data: {
@@ -32,7 +22,6 @@ export async function generateOffer(
   offer_download_url: string;
   nda_download_url: string;
 }> {
-  // Fetch candidate
   const { data: candidate, error: fetchError } = await db
     .from('candidates')
     .select('id, name, status')
@@ -43,7 +32,6 @@ export async function generateOffer(
 
   const currentStatus = candidate.status as CandidateStatus;
 
-  // Check for completed interviews
   const { count: completedCount } = await db
     .from('interviews')
     .select('id', { count: 'exact', head: true })
@@ -52,7 +40,6 @@ export async function generateOffer(
 
   const hasCompletedInterview = (completedCount ?? 0) > 0;
 
-  // Check existing offers
   const { count: offerCount } = await db
     .from('offer_documents')
     .select('id', { count: 'exact', head: true })
@@ -60,7 +47,6 @@ export async function generateOffer(
 
   const isFirstOffer = (offerCount ?? 0) === 0;
 
-  // Transition check: only for the first offer (transitions to 'Offer Sent')
   if (isFirstOffer) {
     const result = canTransition(currentStatus, 'Offer Sent', {
       hasCompletedInterview,
@@ -72,10 +58,8 @@ export async function generateOffer(
     throw new ConflictError('Cannot generate offers for a hired candidate');
   }
 
-  // Generate the offer ID upfront for R2 keys
   const offerId = randomUUID();
 
-  // Render PDFs
   const offerLetterBuffer = await renderOfferLetter({
     candidateName: candidate.name as string,
     roleTitle: data.role_title,
@@ -92,7 +76,6 @@ export async function generateOffer(
     startDate: data.start_date,
   });
 
-  // Upload to R2
   const offerLetterKey = buildOfferKey(candidateId, offerId, 'offer');
   const ndaKey = buildOfferKey(candidateId, offerId, 'nda');
 
@@ -101,7 +84,6 @@ export async function generateOffer(
     uploadObject(ndaKey, ndaBuffer, 'application/pdf'),
   ]);
 
-  // Insert offer record
   const { data: offer, error: insertError } = await db
     .from('offer_documents')
     .insert({
@@ -123,7 +105,6 @@ export async function generateOffer(
     throw new Error(`Failed to create offer: ${insertError?.message}`);
   }
 
-  // Transition candidate to 'Offer Sent' on first offer
   if (isFirstOffer) {
     await db
       .from('candidates')
@@ -133,14 +114,12 @@ export async function generateOffer(
       })
       .eq('id', candidateId);
   } else {
-    // Subsequent offers just bump activity
     await db
       .from('candidates')
       .update({ last_activity_at: new Date().toISOString() })
       .eq('id', candidateId);
   }
 
-  // Timeline event
   await appendEvent(
     candidateId,
     'offer_generated',
@@ -148,7 +127,6 @@ export async function generateOffer(
     { offer_id: offerId, role_title: data.role_title, salary_amount: data.salary_amount },
   );
 
-  // Sign download URLs
   const [offerDownloadUrl, ndaDownloadUrl] = await Promise.all([
     getSignedDownloadUrl(offerLetterKey),
     getSignedDownloadUrl(ndaKey),
@@ -161,9 +139,6 @@ export async function generateOffer(
   };
 }
 
-/**
- * Get a signed download URL for an offer document (offer letter or NDA).
- */
 export async function getOfferDownloadUrl(
   offerId: string,
   doc: 'offer' | 'nda',

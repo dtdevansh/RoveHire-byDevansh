@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto';
 import { db } from '../db/client.js';
 import { env } from '../config/env.js';
 import { NotFoundError, ConflictError } from '../lib/errors.js';
@@ -5,13 +6,9 @@ import { uploadObject, buildResumeKey, getSignedDownloadUrl } from '../lib/r2.js
 import { generateMagicToken, hashToken, buildApplyLink } from '../lib/tokens.js';
 import { appendEvent } from './timeline.service.js';
 import { canTransition, allowedActions } from './stateMachine.js';
-import type { Candidate } from '../types/models.js';
-import type { CandidateStatus } from '../types/models.js';
+import type { Candidate, CandidateStatus } from '../types/models.js';
 import type { CandidateProfileDTO, CandidateListItemDTO, PaginationMeta } from '../types/dto.js';
 
-/**
- * List candidates with filtering, search, and pagination.
- */
 export async function listCandidates(options: {
   status?: CandidateStatus;
   search?: string;
@@ -30,7 +27,6 @@ export async function listCandidates(options: {
   }
 
   if (search) {
-    // Search by name OR current_role (ilike for case-insensitive)
     query = query.or(`name.ilike.%${search}%,current_role.ilike.%${search}%`);
   }
 
@@ -54,19 +50,12 @@ export async function listCandidates(options: {
   };
 }
 
-/**
- * Create a new candidate.
- *
- * Flow: validate PDF → stream to R2 → create candidate (Applied) →
- * create hashed magic token → write 'applied' timeline event → return copyable link.
- */
 export async function createCandidate(data: {
   name: string;
   email: string;
   job_opening_id: string;
   resumeBuffer: Buffer;
 }): Promise<{ candidate: Candidate; application_link: string }> {
-  // Verify job exists and is open
   const { data: job, error: jobError } = await db
     .from('job_openings')
     .select('id, status')
@@ -81,13 +70,10 @@ export async function createCandidate(data: {
     throw new ConflictError('Cannot add candidates to a closed job opening');
   }
 
-  // Upload resume to R2
-  // We use a placeholder ID, then update after insert (or pre-generate UUID)
-  const candidateId = crypto.randomUUID();
+  const candidateId = randomUUID();
   const resumeKey = buildResumeKey(candidateId);
   await uploadObject(resumeKey, data.resumeBuffer, 'application/pdf');
 
-  // Create candidate
   const { data: candidate, error: candidateError } = await db
     .from('candidates')
     .insert({
@@ -105,7 +91,6 @@ export async function createCandidate(data: {
     throw new Error(`Failed to create candidate: ${candidateError.message}`);
   }
 
-  // Create magic token
   const rawToken = generateMagicToken();
   const tokenHash = hashToken(rawToken);
   const expiresAt = new Date();
@@ -123,22 +108,15 @@ export async function createCandidate(data: {
     throw new Error(`Failed to create application token: ${tokenError.message}`);
   }
 
-  // Timeline event
   await appendEvent(candidateId, 'applied', `${data.name} applied for the position`);
-
-  const applicationLink = buildApplyLink(rawToken);
 
   return {
     candidate: candidate as unknown as Candidate,
-    application_link: applicationLink,
+    application_link: buildApplyLink(rawToken),
   };
 }
 
-/**
- * Get the full candidate profile aggregate.
- */
 export async function getCandidateProfile(id: string): Promise<CandidateProfileDTO> {
-  // Fetch candidate
   const { data: candidate, error } = await db
     .from('candidates')
     .select()
@@ -147,35 +125,30 @@ export async function getCandidateProfile(id: string): Promise<CandidateProfileD
 
   if (error || !candidate) throw new NotFoundError(`Candidate not found: ${id}`);
 
-  // Fetch job
   const { data: job } = await db
     .from('job_openings')
     .select('id, title')
     .eq('id', candidate.job_opening_id)
     .single();
 
-  // Fetch interviews
   const { data: interviews } = await db
     .from('interviews')
     .select()
     .eq('candidate_id', id)
     .order('scheduled_at', { ascending: false });
 
-  // Fetch offers
   const { data: offers } = await db
     .from('offer_documents')
     .select()
     .eq('candidate_id', id)
     .order('created_at', { ascending: false });
 
-  // Fetch timeline
   const { data: timeline } = await db
     .from('timeline_events')
     .select()
     .eq('candidate_id', id)
     .order('created_at', { ascending: false });
 
-  // Sign URLs
   const resumeDownloadUrl = await getSignedDownloadUrl(candidate.resume_key as string);
 
   const offersWithUrls = await Promise.all(
@@ -186,10 +159,7 @@ export async function getCandidateProfile(id: string): Promise<CandidateProfileD
     })),
   );
 
-  // Compute allowed actions via the state machine
-  const hasCompletedInterview = (interviews ?? []).some(
-    (i) => i.outcome === 'Completed',
-  );
+  const hasCompletedInterview = (interviews ?? []).some((i) => i.outcome === 'Completed');
   const hasOffer = (offers ?? []).length > 0;
 
   const actions = allowedActions(candidate.status as CandidateStatus, {
@@ -223,9 +193,6 @@ export async function getCandidateProfile(id: string): Promise<CandidateProfileD
   } satisfies CandidateProfileDTO;
 }
 
-/**
- * Get a freshly-signed resume download URL.
- */
 export async function getResumeUrl(candidateId: string): Promise<string> {
   const { data: candidate, error } = await db
     .from('candidates')
@@ -237,13 +204,7 @@ export async function getResumeUrl(candidateId: string): Promise<string> {
   return getSignedDownloadUrl(candidate.resume_key as string);
 }
 
-/**
- * Reject a candidate.
- */
-export async function rejectCandidate(
-  id: string,
-  reason: string,
-): Promise<Candidate> {
+export async function rejectCandidate(id: string, reason: string): Promise<Candidate> {
   const { data: candidate, error: fetchError } = await db
     .from('candidates')
     .select('status')
@@ -281,11 +242,7 @@ export async function rejectCandidate(
   return updated as unknown as Candidate;
 }
 
-/**
- * Hire a candidate.
- */
 export async function hireCandidate(id: string): Promise<Candidate> {
-  // Fetch candidate + check for offers
   const { data: candidate, error: fetchError } = await db
     .from('candidates')
     .select('status')
@@ -326,9 +283,6 @@ export async function hireCandidate(id: string): Promise<Candidate> {
   return updated as unknown as Candidate;
 }
 
-/**
- * Helper: bump last_activity_at on a candidate.
- */
 export async function touchActivity(candidateId: string): Promise<void> {
   await db
     .from('candidates')

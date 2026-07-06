@@ -2,15 +2,9 @@ import multer from 'multer';
 import { env } from '../config/env.js';
 import { AppError } from '../lib/errors.js';
 
-/**
- * Multer configuration for resume uploads.
- *
- * - Single file field named "resume"
- * - PDF only (application/pdf)
- * - Size limit from MAX_RESUME_MB env var (default 10MB)
- */
 const storage = multer.memoryStorage();
 
+// API4: resume uploads are constrained to a single PDF within the MAX_RESUME_MB size cap.
 const fileFilter: multer.Options['fileFilter'] = (_req, file, cb) => {
   if (file.mimetype !== 'application/pdf') {
     cb(new AppError(422, 'INVALID_FILE_TYPE', 'Only PDF files are accepted'));

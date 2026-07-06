@@ -1,26 +1,18 @@
 import type { Request, Response, NextFunction } from 'express';
 import { MulterError } from 'multer';
+import pino from 'pino';
 import { AppError, ValidationError } from '../lib/errors.js';
 import { fail } from '../lib/response.js';
-import pino from 'pino';
 
 const logger = pino({ name: 'error-handler' });
 
-/**
- * Centralized error handler.
- *
- * - Maps AppError subclasses to their status codes
- * - Handles Multer errors (file upload issues)
- * - Catches unexpected errors → 500 with no stack leak (API8)
- * - Logs full error details server-side
- */
+// API8: unexpected errors are logged server-side and never leak stack traces to the client.
 export function errorHandler(
   err: Error,
   _req: Request,
   res: Response,
   _next: NextFunction,
 ): void {
-  // Operational AppErrors — expected, safe to expose
   if (err instanceof AppError) {
     if (err instanceof ValidationError) {
       fail(res, err.statusCode, err.code, err.message, err.details);
@@ -30,7 +22,6 @@ export function errorHandler(
     return;
   }
 
-  // Multer file upload errors
   if (err instanceof MulterError) {
     if (err.code === 'LIMIT_FILE_SIZE') {
       fail(res, 422, 'FILE_TOO_LARGE', 'File exceeds the maximum allowed size');
@@ -40,7 +31,6 @@ export function errorHandler(
     return;
   }
 
-  // Unexpected errors — log full details, never expose stack to client
   logger.error({ err, message: err.message, stack: err.stack }, 'Unhandled error');
   fail(res, 500, 'INTERNAL_ERROR', 'An unexpected error occurred');
 }

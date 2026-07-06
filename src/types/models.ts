@@ -1,7 +1,3 @@
-// ─────────────────────────────────────────────────────────────
-// DB row types — mirrors the SQL schema in migrations/001_init.sql
-// ─────────────────────────────────────────────────────────────
-
 export type CandidateStatus =
   | 'Applied'
   | 'Form Submitted'

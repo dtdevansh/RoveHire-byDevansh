@@ -1,9 +1,5 @@
 import { Document, Page, Text, View, StyleSheet } from '@react-pdf/renderer';
 
-// ─────────────────────────────────────────────────────────────
-// Non-Disclosure Agreement PDF Template
-// ─────────────────────────────────────────────────────────────
-
 const styles = StyleSheet.create({
   page: {
     padding: 60,

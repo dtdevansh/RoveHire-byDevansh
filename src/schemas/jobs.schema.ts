@@ -1,8 +1,5 @@
 import { z } from 'zod';
 
-/**
- * POST /api/v1/jobs — Create a new job opening.
- */
 export const createJobSchema = z.object({
   body: z.object({
     title: z.string().min(1).max(200),
@@ -12,9 +9,6 @@ export const createJobSchema = z.object({
   }),
 });
 
-/**
- * PATCH /api/v1/jobs/:id — Update an existing job opening.
- */
 export const updateJobSchema = z.object({
   params: z.object({
     id: z.string().uuid(),
@@ -27,9 +21,6 @@ export const updateJobSchema = z.object({
   }),
 });
 
-/**
- * GET /api/v1/jobs/:id — Get a specific job.
- */
 export const getJobSchema = z.object({
   params: z.object({
     id: z.string().uuid(),

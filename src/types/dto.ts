@@ -5,15 +5,6 @@ import type {
   TimelineEvent,
 } from './models.js';
 
-// ─────────────────────────────────────────────────────────────
-// Response DTOs
-// ─────────────────────────────────────────────────────────────
-
-/**
- * The full candidate profile aggregate.
- * `allowed_actions` is computed server-side by the state machine —
- * the frontend renders buttons from this list, never re-derives guards.
- */
 export interface CandidateProfileDTO {
   id: string;
   name: string;
@@ -41,18 +32,11 @@ export interface CandidateProfileDTO {
   last_activity_at: string;
 }
 
-/**
- * Public apply page context — MINIMAL data only.
- * Never leak internal IDs, status, or candidate details on the public surface.
- */
 export interface ApplyContextDTO {
   candidate_name: string;
   role: string;
 }
 
-/**
- * Job listing item (for the jobs list endpoint).
- */
 export interface JobListItemDTO {
   id: string;
   title: string;
@@ -62,9 +46,6 @@ export interface JobListItemDTO {
   created_at: string;
 }
 
-/**
- * Candidate list item (for the candidates list endpoint).
- */
 export interface CandidateListItemDTO {
   id: string;
   name: string;
@@ -73,9 +54,6 @@ export interface CandidateListItemDTO {
   last_activity_at: string;
 }
 
-/**
- * Pagination metadata.
- */
 export interface PaginationMeta {
   page: number;
   limit: number;

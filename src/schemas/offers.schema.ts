@@ -1,8 +1,5 @@
 import { z } from 'zod';
 
-/**
- * POST /api/v1/candidates/:id/offers — Generate offer + NDA documents.
- */
 export const createOfferSchema = z.object({
   params: z.object({
     id: z.string().uuid(),
@@ -17,9 +14,6 @@ export const createOfferSchema = z.object({
   }),
 });
 
-/**
- * GET /api/v1/offers/:id/download?doc=offer|nda — Download offer/NDA.
- */
 export const downloadOfferSchema = z.object({
   params: z.object({
     id: z.string().uuid(),
