@@ -49,6 +49,7 @@ export interface JobListItemDTO {
 export interface CandidateListItemDTO {
   id: string;
   name: string;
+  email: string;
   role: string;
   status: CandidateStatus;
   last_activity_at: string;

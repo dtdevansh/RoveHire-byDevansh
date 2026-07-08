@@ -1,33 +1,10 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
-const PROTECTED_PATHS = ['/', '/candidates', '/jobs', '/interviews'];
-const AUTH_PATHS = ['/login'];
-
-export function proxy(request: NextRequest) {
-  const { pathname } = request.nextUrl;
-
-  const hasSession =
-    request.cookies.has('sb-access-token') ||
-    request.cookies.has('sb-refresh-token');
-
-  const isProtected = PROTECTED_PATHS.some(
-    (path) => pathname === path || pathname.startsWith(`${path}/`),
-  );
-  const isAuthPath = AUTH_PATHS.some(
-    (path) => pathname === path || pathname.startsWith(`${path}/`),
-  );
-
-  if (isProtected && !hasSession) {
-    const loginUrl = new URL('/login', request.url);
-    loginUrl.searchParams.set('redirect', pathname);
-    return NextResponse.redirect(loginUrl);
-  }
-
-  if (isAuthPath && hasSession) {
-    return NextResponse.redirect(new URL('/', request.url));
-  }
-
+// Auth gating is handled client-side (AuthProvider + (app)/layout.tsx)
+// because Supabase JS stores sessions in localStorage, not cookies.
+// Middleware only runs server-side and can't access localStorage.
+export function proxy(_request: NextRequest) {
   return NextResponse.next();
 }
 

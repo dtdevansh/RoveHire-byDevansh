@@ -72,6 +72,9 @@ export interface Interview {
   recommendation: Recommendation | null;
   feedback_note: string | null;
   created_at: string;
+  // Present on the cross-candidate interviews list (denormalised for display).
+  candidate_name?: string;
+  candidate_role?: string;
 }
 
 export interface OfferDocument {

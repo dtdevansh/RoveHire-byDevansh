@@ -31,7 +31,11 @@ export async function completeInterview(
 ): Promise<Interview> {
   const response = await client.patch<{ data: Interview }>(
     `/interviews/${id}`,
-    payload,
+    {
+      outcome: 'Completed',
+      recommendation: payload.recommendation,
+      feedback_note: payload.feedback_note,
+    },
   );
   return unwrap(response);
 }

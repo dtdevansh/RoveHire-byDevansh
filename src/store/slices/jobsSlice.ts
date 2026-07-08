@@ -31,7 +31,9 @@ export const fetchJob = createAsyncThunk(
 export const createJob = createAsyncThunk(
   'jobs/createJob',
   async (
-    payload: Pick<JobOpening, 'title' | 'description' | 'required_skills'>,
+    payload: Pick<JobOpening, 'title' | 'description' | 'required_skills'> & {
+      status?: JobOpening['status'];
+    },
     { dispatch },
   ) => {
     const job = await jobsApi.createJob(payload);

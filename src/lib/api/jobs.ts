@@ -13,7 +13,9 @@ export async function getJob(id: string): Promise<JobOpening> {
 }
 
 export async function createJob(
-  payload: Pick<JobOpening, 'title' | 'description' | 'required_skills'>,
+  payload: Pick<JobOpening, 'title' | 'description' | 'required_skills'> & {
+    status?: JobOpening['status'];
+  },
 ): Promise<JobOpening> {
   const response = await client.post<{ data: JobOpening }>('/jobs', payload);
   return unwrap(response);

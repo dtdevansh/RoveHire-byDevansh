@@ -14,6 +14,8 @@
   --color-brand: #E05020;
   --color-brand-hover: #F1592A;
   --color-brand-pressed: #B8431C;
+  --color-brand-subtle: rgba(224, 80, 32, 0.14);
+  --color-on-brand: #FFFFFF;
 
   --color-status-applied: #3B82F6;
   --color-status-applied-text: #93C5FD;
@@ -53,6 +55,106 @@ body {
 }
 
 *:focus-visible {
-  outline: 2px solid var(--color-brand);
-  outline-offset: 2px;
+  outline: none;
+  box-shadow: 0 0 0 2px var(--color-bg), 0 0 0 4px rgba(224, 80, 32, 0.4);
+  border-radius: 8px;
+}
+
+::selection {
+  background: var(--color-brand-subtle);
+  color: var(--color-text-primary);
+}
+
+/* Thin, warm scrollbars to match the dark canvas. */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #2A2A2E transparent;
+}
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+*::-webkit-scrollbar-thumb {
+  background: #2A2A2E;
+  border-radius: 999px;
+  border: 3px solid transparent;
+  background-clip: padding-box;
+}
+*::-webkit-scrollbar-thumb:hover {
+  background: #3A3A3F;
+  background-clip: padding-box;
+}
+
+@keyframes rove-shimmer {
+  0% { background-position: -800px 0; }
+  100% { background-position: 800px 0; }
+}
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    #1C1C1F 25%,
+    #232327 37%,
+    #1C1C1F 63%
+  );
+  background-size: 800px 100%;
+  animation: rove-shimmer 1.4s ease-in-out infinite;
+}
+
+@keyframes rove-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes rove-slide-in {
+  from { transform: translateX(24px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+@keyframes rove-scale-in {
+  from { transform: scale(0.96); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+.animate-fade-in { animation: rove-fade-in 160ms ease-out; }
+.animate-slide-in { animation: rove-slide-in 200ms ease-out; }
+.animate-scale-in { animation: rove-scale-in 160ms ease-out; }
+
+/* Rendered markdown (job descriptions, preview tab). */
+.markdown h1,
+.markdown h2,
+.markdown h3 {
+  color: var(--color-text-primary);
+  font-weight: 600;
+  margin: 1em 0 0.5em;
+  line-height: 1.4;
+}
+.markdown h1 { font-size: 1.05rem; }
+.markdown h2 { font-size: 1rem; }
+.markdown h3 { font-size: 0.95rem; }
+.markdown p { margin: 0.5em 0; }
+.markdown strong { color: var(--color-text-primary); font-weight: 600; }
+.markdown ul,
+.markdown ol { margin: 0.5em 0; padding-left: 1.25em; }
+.markdown ul { list-style: disc; }
+.markdown ol { list-style: decimal; }
+.markdown li { margin: 0.25em 0; }
+.markdown a { color: var(--color-brand-hover); text-decoration: underline; }
+.markdown code {
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+  background: var(--color-surface2);
+  padding: 0.1em 0.35em;
+  border-radius: 4px;
+}
+.markdown blockquote {
+  border-left: 2px solid var(--color-border-strong);
+  padding-left: 0.75em;
+  color: var(--color-text-muted);
+  margin: 0.5em 0;
+}
+.markdown > :first-child { margin-top: 0; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
