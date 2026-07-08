@@ -1,34 +1,34 @@
-import { PutObjectCommand, GetObjectCommand } from '@aws-sdk/client-s3';
-import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { randomUUID } from 'node:crypto';
-import { r2Client } from '../config/r2.js';
+import { supabase } from '../config/supabase.js';
 import { env } from '../config/env.js';
+
+const bucket = () => supabase.storage.from(env.SUPABASE_STORAGE_BUCKET);
 
 export async function uploadObject(
   key: string,
   body: Buffer,
   contentType: string,
 ): Promise<void> {
-  await r2Client.send(
-    new PutObjectCommand({
-      Bucket: env.R2_BUCKET,
-      Key: key,
-      Body: body,
-      ContentType: contentType,
-    }),
-  );
+  const { error } = await bucket().upload(key, body, {
+    contentType,
+    upsert: true,
+  });
+
+  if (error) throw new Error(`Storage upload failed: ${error.message}`);
 }
 
-// API3: raw R2 keys never leave the server — clients only ever receive short-TTL signed URLs.
+// Raw storage keys never leave the server — clients only ever receive short-TTL signed URLs.
 export async function getSignedDownloadUrl(
   key: string,
   ttl: number = env.SIGNED_URL_TTL_SECONDS,
 ): Promise<string> {
-  const command = new GetObjectCommand({
-    Bucket: env.R2_BUCKET,
-    Key: key,
-  });
-  return getSignedUrl(r2Client, command, { expiresIn: ttl });
+  const { data, error } = await bucket().createSignedUrl(key, ttl);
+
+  if (error || !data?.signedUrl) {
+    throw new Error(`Failed to create signed URL: ${error?.message ?? 'unknown'}`);
+  }
+
+  return data.signedUrl;
 }
 
 export function buildResumeKey(candidateId: string): string {

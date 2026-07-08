@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import { db } from '../db/client.js';
 import { NotFoundError, ConflictError } from '../lib/errors.js';
-import { uploadObject, buildOfferKey, getSignedDownloadUrl } from '../lib/r2.js';
+import { uploadObject, buildOfferKey, getSignedDownloadUrl } from '../lib/storage.js';
 import { renderOfferLetter, renderNDA } from '../lib/pdf/render.js';
 import { canTransition } from './stateMachine.js';
 import { appendEvent } from './timeline.service.js';

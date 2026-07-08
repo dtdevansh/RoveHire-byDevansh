@@ -35,7 +35,7 @@ create table if not exists candidates (
   resume_key         text not null,
   phone              text,
   current_location   text,
-  current_role       text,
+  "current_role"     text,
   notice_period      text,
   salary_expectation text,
   linkedin_url       text,

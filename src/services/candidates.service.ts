@@ -2,7 +2,7 @@ import { randomUUID } from 'node:crypto';
 import { db } from '../db/client.js';
 import { env } from '../config/env.js';
 import { NotFoundError, ConflictError } from '../lib/errors.js';
-import { uploadObject, buildResumeKey, getSignedDownloadUrl } from '../lib/r2.js';
+import { uploadObject, buildResumeKey, getSignedDownloadUrl } from '../lib/storage.js';
 import { generateMagicToken, hashToken, buildApplyLink } from '../lib/tokens.js';
 import { appendEvent } from './timeline.service.js';
 import { canTransition, allowedActions } from './stateMachine.js';

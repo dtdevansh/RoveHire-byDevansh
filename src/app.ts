@@ -16,10 +16,16 @@ const app = express();
 
 app.use(helmet());
 
-// API8: CORS is locked to the single configured frontend origin, never a wildcard.
+// API8: CORS is locked to the configured frontend origin allowlist, never a wildcard.
 app.use(
   cors({
-    origin: env.FRONTEND_ORIGIN,
+    origin(origin, callback) {
+      if (!origin || env.FRONTEND_ORIGIN.includes(origin)) {
+        callback(null, true);
+        return;
+      }
+      callback(null, false);
+    },
     credentials: true,
     methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],

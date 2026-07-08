@@ -10,5 +10,6 @@ export function hashToken(raw: string): string {
 }
 
 export function buildApplyLink(rawToken: string): string {
-  return `${env.FRONTEND_ORIGIN}/apply/${rawToken}`;
+  const canonicalOrigin = env.FRONTEND_ORIGIN[0]!;
+  return `${canonicalOrigin}/apply/${rawToken}`;
 }
