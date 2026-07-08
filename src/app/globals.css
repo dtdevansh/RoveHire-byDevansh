@@ -1,0 +1,58 @@
+@import "tailwindcss";
+
+@theme inline {
+  --color-bg: #0B0B0C;
+  --color-surface1: #141416;
+  --color-surface2: #1C1C1F;
+  --color-border: #2A2A2E;
+  --color-border-strong: #3A3A3F;
+
+  --color-text-primary: #F4F3F1;
+  --color-text-secondary: #9C9AA1;
+  --color-text-muted: #6C6A70;
+
+  --color-brand: #E05020;
+  --color-brand-hover: #F1592A;
+  --color-brand-pressed: #B8431C;
+
+  --color-status-applied: #3B82F6;
+  --color-status-applied-text: #93C5FD;
+  --color-status-applied-bg: rgba(59, 130, 246, 0.15);
+
+  --color-status-form-submitted: #8B5CF6;
+  --color-status-form-submitted-text: #C4B5FD;
+  --color-status-form-submitted-bg: rgba(139, 92, 246, 0.15);
+
+  --color-status-interview-scheduled: #F59E0B;
+  --color-status-interview-scheduled-text: #FCD34D;
+  --color-status-interview-scheduled-bg: rgba(245, 158, 11, 0.15);
+
+  --color-status-offer-sent: #10B981;
+  --color-status-offer-sent-text: #6EE7B7;
+  --color-status-offer-sent-bg: rgba(16, 185, 129, 0.15);
+
+  --color-status-hired: #22C55E;
+  --color-status-hired-text: #86EFAC;
+  --color-status-hired-bg: rgba(34, 197, 94, 0.15);
+
+  --color-status-rejected: #EF4444;
+  --color-status-rejected-text: #FCA5A5;
+  --color-status-rejected-bg: rgba(239, 68, 68, 0.15);
+
+  --radius-control: 8px;
+  --radius-card: 12px;
+
+  --font-sans: var(--font-inter);
+  --font-mono: var(--font-jetbrains-mono);
+}
+
+body {
+  background: var(--color-bg);
+  color: var(--color-text-primary);
+  font-feature-settings: "tnum";
+}
+
+*:focus-visible {
+  outline: 2px solid var(--color-brand);
+  outline-offset: 2px;
+}
